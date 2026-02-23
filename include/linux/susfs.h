@@ -236,6 +236,10 @@ void susfs_show_version(void __user **user_info);
 
 void susfs_start_sdcard_monitor_fn(void);
 
+/* prctl command dispatcher */
+int susfs_prctl_cmd_handler(unsigned long arg2, unsigned long arg3,
+			    unsigned long arg4, unsigned long arg5);
+
 /* susfs_init */
 void susfs_init(void);
 

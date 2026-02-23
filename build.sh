@@ -145,6 +145,12 @@ else
     CONFIGS="${DEFCONFIG}"    
 fi
 
+make ARCH=arm64 mrproper 2>/dev/null || true
+# Explicitly remove any stale root-level build artifacts (e.g. from a previous non-O= build)
+rm -rf include/generated include/config .config Module.symvers
+make ${MAKE_ARGS} mrproper 2>/dev/null || true
+# Force-clean KernelSU objects (symlink-based sources are not reliably detected by make)
+rm -rf out/drivers/kernelsu/
 make ${MAKE_ARGS} ${CONFIGS} || exit 1
 make ${MAKE_ARGS} || exit 1
 

@@ -1218,6 +1218,97 @@ void susfs_start_sdcard_monitor_fn(void) {
 	}
 }
 
+/* susfs_prctl_cmd_handler - dispatches CMD_SUSFS_* prctl commands */
+int susfs_prctl_cmd_handler(unsigned long arg2, unsigned long arg3,
+			    unsigned long arg4, unsigned long arg5)
+{
+	/* Allow query commands from any process; all mutation commands
+	 * require the caller to be in the KSU domain. */
+	bool is_query_cmd = (arg2 == CMD_SUSFS_SHOW_VERSION ||
+			     arg2 == CMD_SUSFS_SHOW_ENABLED_FEATURES ||
+			     arg2 == CMD_SUSFS_SHOW_VARIANT);
+
+	if (!is_query_cmd && !susfs_is_current_ksu_domain()) {
+		pr_err("susfs: process uid=%d is not ksu domain, rejecting CMD 0x%lx\n",
+		       current_uid().val, arg2);
+		return -EPERM;
+	}
+
+	switch (arg2) {
+#ifdef CONFIG_KSU_SUSFS_SUS_PATH
+	case CMD_SUSFS_ADD_SUS_PATH:
+		susfs_add_sus_path((void __user **)&arg3);
+		return 0;
+	case CMD_SUSFS_SET_ANDROID_DATA_ROOT_PATH:
+	case CMD_SUSFS_SET_SDCARD_ROOT_PATH:
+		susfs_set_i_state_on_external_dir((void __user **)&arg3);
+		return 0;
+	case CMD_SUSFS_ADD_SUS_PATH_LOOP:
+		susfs_add_sus_path_loop((void __user **)&arg3);
+		return 0;
+#endif
+#ifdef CONFIG_KSU_SUSFS_SUS_MOUNT
+	case CMD_SUSFS_HIDE_SUS_MNTS_FOR_NON_SU_PROCS:
+		susfs_set_hide_sus_mnts_for_non_su_procs((void __user **)&arg3);
+		return 0;
+#endif
+#ifdef CONFIG_KSU_SUSFS_SUS_KSTAT
+	case CMD_SUSFS_ADD_SUS_KSTAT:
+	case CMD_SUSFS_ADD_SUS_KSTAT_STATICALLY:
+		susfs_add_sus_kstat((void __user **)&arg3);
+		return 0;
+	case CMD_SUSFS_UPDATE_SUS_KSTAT:
+		susfs_update_sus_kstat((void __user **)&arg3);
+		return 0;
+#endif
+#ifdef CONFIG_KSU_SUSFS_TRY_UMOUNT
+	case CMD_SUSFS_ADD_TRY_UMOUNT:
+		susfs_add_try_umount((void __user **)&arg3);
+		return 0;
+#endif
+#ifdef CONFIG_KSU_SUSFS_SPOOF_UNAME
+	case CMD_SUSFS_SET_UNAME:
+		susfs_set_uname((void __user **)&arg3);
+		return 0;
+#endif
+#ifdef CONFIG_KSU_SUSFS_ENABLE_LOG
+	case CMD_SUSFS_ENABLE_LOG:
+		susfs_enable_log((void __user **)&arg3);
+		return 0;
+#endif
+#ifdef CONFIG_KSU_SUSFS_SPOOF_CMDLINE_OR_BOOTCONFIG
+	case CMD_SUSFS_SET_CMDLINE_OR_BOOTCONFIG:
+		susfs_set_cmdline_or_bootconfig((void __user **)&arg3);
+		return 0;
+#endif
+#ifdef CONFIG_KSU_SUSFS_OPEN_REDIRECT
+	case CMD_SUSFS_ADD_OPEN_REDIRECT:
+		susfs_add_open_redirect((void __user **)&arg3);
+		return 0;
+#endif
+#ifdef CONFIG_KSU_SUSFS_SUS_MAP
+	case CMD_SUSFS_ADD_SUS_MAP:
+		susfs_add_sus_map((void __user **)&arg3);
+		return 0;
+#endif
+	case CMD_SUSFS_ENABLE_AVC_LOG_SPOOFING:
+		susfs_set_avc_log_spoofing((void __user **)&arg3);
+		return 0;
+	case CMD_SUSFS_SHOW_VERSION:
+		susfs_show_version((void __user **)&arg3);
+		return 0;
+	case CMD_SUSFS_SHOW_ENABLED_FEATURES:
+		susfs_get_enabled_features((void __user **)&arg3);
+		return 0;
+	case CMD_SUSFS_SHOW_VARIANT:
+		susfs_show_variant((void __user **)&arg3);
+		return 0;
+	default:
+		pr_err("susfs: unknown CMD: '0x%lx'\n", arg2);
+		return -ENOSYS;
+	}
+}
+
 /* susfs_init */
 void susfs_init(void) {
 #ifdef CONFIG_KSU_SUSFS_SPOOF_UNAME
