@@ -11,7 +11,19 @@ export OUT_DIR=${ANDROID_BUILD_TOP}/out
 if [ "${MODE}" == 'ksun' ]; then
     curl -LSs "https://raw.githubusercontent.com/KernelSU-Next/KernelSU-Next/legacy/kernel/setup.sh" | bash -s legacy
 elif [ "${MODE}" == 'susfs' ]; then
-    curl -LSs "https://raw.githubusercontent.com/GoRhanHee/KernelSU-Next/legacy-susfs/kernel/setup.sh" | bash -s legacy-susfs
+    # Use local legacy-susfs branch with SuSFS patches applied to KernelSU-Next
+    KSU_DIR="${ANDROID_BUILD_TOP}/KernelSU-Next"
+    if [ ! -d "${KSU_DIR}/.git" ]; then
+        echo "ERROR: KernelSU-Next directory not found. Run with 'ksun' mode first."
+        exit 1
+    fi
+    cd "${KSU_DIR}"
+    git stash 2>/dev/null || true
+    git checkout legacy-susfs
+    cd "${ANDROID_BUILD_TOP}"
+    if [ ! -L "${ANDROID_BUILD_TOP}/drivers/kernelsu" ]; then
+        ln -sf ../KernelSU-Next/kernel "${ANDROID_BUILD_TOP}/drivers/kernelsu"
+    fi
 fi
 
 # Define specific variables
