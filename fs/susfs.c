@@ -46,14 +46,14 @@ static DEFINE_SPINLOCK(susfs_spin_lock_sus_path);
 static LIST_HEAD(LH_SUS_PATH_LOOP);
 static LIST_HEAD(LH_SUS_PATH_ANDROID_DATA);
 static LIST_HEAD(LH_SUS_PATH_SDCARD);
-static struct st_external_dir android_data_path = {0};
-static struct st_external_dir sdcard_path = {0};
+static struct st_external_dir android_data_path;
+static struct st_external_dir sdcard_path;
 const struct qstr susfs_fake_qstr_name = QSTR_INIT("..5.u.S", 7); // used to re-test the dcache lookup, make sure you don't have file named like this!!
 
 void susfs_set_i_state_on_external_dir(void __user **user_info) {
 	struct path path;
 	struct inode *inode = NULL;
-	static struct st_external_dir info = {0};
+	static struct st_external_dir info;
 
 	if (copy_from_user(&info, (struct st_external_dir __user*)*user_info, sizeof(info))) {
 		info.err = -EFAULT;
