@@ -649,7 +649,8 @@ static void susfs_my_uname_init(void) {
 }
 
 void susfs_set_uname(void __user **user_info) {
-	struct st_susfs_uname info = {0};
+	struct st_susfs_uname info;
+	memset(&info, 0, sizeof(info));
 
 	if (copy_from_user(&info, (struct st_susfs_uname __user*)*user_info, sizeof(info))) {
 		info.err = -EFAULT;
@@ -1011,7 +1012,8 @@ out_copy_to_user:
 
 /* show_variant */
 void susfs_show_variant(void __user **user_info) {
-	struct st_susfs_variant info = {0};
+	struct st_susfs_variant info;
+	memset(&info, 0, sizeof(info));
 
 	if (copy_from_user(&info, (struct st_susfs_variant __user*)*user_info, sizeof(info))) {
 		info.err = -EFAULT;
@@ -1029,7 +1031,8 @@ out_copy_to_user:
 
 /* show version */
 void susfs_show_version(void __user **user_info) {
-	struct st_susfs_version info = {0};
+	struct st_susfs_version info;
+	memset(&info, 0, sizeof(info));
 
 	if (copy_from_user(&info, (struct st_susfs_version __user*)*user_info, sizeof(info))) {
 		info.err = -EFAULT;
