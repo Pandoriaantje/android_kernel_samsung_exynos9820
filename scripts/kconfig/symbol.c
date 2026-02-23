@@ -1120,7 +1120,10 @@ static void sym_check_print_recursive(struct symbol *last_sym)
 	struct dep_stack cv_stack;
 
 	if (sym_is_choice_value(last_sym)) {
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdangling-pointer"
 		dep_stack_insert(&cv_stack, last_sym);
+#pragma GCC diagnostic pop
 		last_sym = prop_get_symbol(sym_get_choice_prop(last_sym));
 	}
 
